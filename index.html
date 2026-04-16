@@ -34,7 +34,6 @@
                 <p class="hero__description" id="hero-description"></p>
                 <div class="hero__actions">
                     <a class="button button--primary" href="#timeline">翻看回忆</a>
-                    <button class="button button--ghost" id="open-editor" type="button">编辑小站</button>
                 </div>
                 <div class="hero__meta">
                     <article class="person-card">
@@ -114,119 +113,9 @@
         </footer>
     </div>
 
-    <button class="editor-fab" id="editor-fab" type="button" aria-label="打开编辑面板">EDIT</button>
-
-    <aside class="editor hidden" id="editor-panel" aria-hidden="true">
-        <div class="editor__overlay" id="editor-overlay"></div>
-        <div class="editor__drawer">
-            <div class="editor__header">
-                <div>
-                    <p class="eyebrow">EDITOR</p>
-                    <h2>编辑情侣小站</h2>
-                    <p>改完会自动保存到当前浏览器，也可以导出 JSON 备份。</p>
-                </div>
-                <button class="icon-button" id="close-editor" type="button" aria-label="关闭编辑面板">×</button>
-            </div>
-
-            <form class="editor__body" id="editor-form">
-                <section class="editor-group">
-                    <h3>基础信息</h3>
-                    <label>网站标题<input id="site-title-input" name="siteTitle" type="text"></label>
-                    <label>开场标签<input id="hero-badge-input" name="heroBadge" type="text"></label>
-                    <label>开场主标题<input id="hero-title-input" name="heroTitle" type="text"></label>
-                    <label>开场副标题<textarea id="hero-subtitle-input" name="heroSubtitle" rows="2"></textarea></label>
-                    <label>开场介绍<textarea id="hero-description-input" name="heroDescription" rows="4"></textarea></label>
-                    <label>在一起日期<input id="anniversary-input" name="anniversaryDate" type="datetime-local"></label>
-                    <label>页脚文案<input id="footer-text-input" name="footerText" type="text"></label>
-                </section>
-
-                <section class="editor-group">
-                    <h3>人物与封面</h3>
-                    <label>左侧名字<input id="person-a-name-input" name="personAName" type="text"></label>
-                    <label>左侧头像链接<input id="person-a-image-input" name="personAImage" type="url" placeholder="https://..."></label>
-                    <label class="upload-field">左侧头像上传<input id="person-a-upload-input" accept="image/*" type="file"></label>
-                    <label>右侧名字<input id="person-b-name-input" name="personBName" type="text"></label>
-                    <label>右侧头像链接<input id="person-b-image-input" name="personBImage" type="url" placeholder="https://..."></label>
-                    <label class="upload-field">右侧头像上传<input id="person-b-upload-input" accept="image/*" type="file"></label>
-                    <label>封面背景图链接<input id="hero-image-input" name="heroImage" type="url" placeholder="https://..."></label>
-                    <label class="upload-field">封面背景图上传<input id="hero-upload-input" accept="image/*" type="file"></label>
-                </section>
-
-                <section class="editor-group">
-                    <div class="editor-group__head">
-                        <h3>时间线</h3>
-                        <button class="button button--small" id="add-timeline-item" type="button">新增事件</button>
-                    </div>
-                    <div class="repeat-list" id="timeline-editor-list"></div>
-                </section>
-
-                <section class="editor-group">
-                    <div class="editor-group__head">
-                        <h3>相册</h3>
-                        <button class="button button--small" id="add-gallery-item" type="button">新增照片</button>
-                    </div>
-                    <div class="repeat-list" id="gallery-editor-list"></div>
-                </section>
-
-                <section class="editor-group">
-                    <div class="editor-group__head">
-                        <h3>短笺</h3>
-                        <button class="button button--small" id="add-note-item" type="button">新增卡片</button>
-                    </div>
-                    <div class="repeat-list" id="note-editor-list"></div>
-                </section>
-            </form>
-
-            <div class="editor__footer">
-                <div class="editor__tools">
-                    <button class="button button--ghost" id="export-json" type="button">导出 JSON</button>
-                    <label class="button button--ghost file-button" for="import-json">导入 JSON</label>
-                    <input class="hidden-input" id="import-json" accept="application/json" type="file">
-                    <button class="button button--ghost" id="reset-content" type="button">恢复默认</button>
-                </div>
-                <button class="button button--primary" id="save-editor" type="button">保存修改</button>
-            </div>
-        </div>
-    </aside>
-
-    <template id="timeline-editor-template">
-        <article class="repeat-card">
-            <div class="repeat-card__head">
-                <strong>时间线事件</strong>
-                <button class="link-button" data-action="remove" type="button">删除</button>
-            </div>
-            <label>日期<input data-field="date" type="text" placeholder="2026.04.16"></label>
-            <label>标题<input data-field="title" type="text" placeholder="第一次约会"></label>
-            <label>描述<textarea data-field="description" rows="3" placeholder="记录这一天发生了什么"></textarea></label>
-        </article>
-    </template>
-
-    <template id="gallery-editor-template">
-        <article class="repeat-card">
-            <div class="repeat-card__head">
-                <strong>相册项目</strong>
-                <button class="link-button" data-action="remove" type="button">删除</button>
-            </div>
-            <label>标题<input data-field="title" type="text" placeholder="海边晚风"></label>
-            <label>描述<textarea data-field="description" rows="2" placeholder="这张照片背后的故事"></textarea></label>
-            <label>图片链接<input data-field="image" type="url" placeholder="https://..."></label>
-            <label class="upload-field">上传图片<input data-field="upload" accept="image/*" type="file"></label>
-        </article>
-    </template>
-
-    <template id="note-editor-template">
-        <article class="repeat-card">
-            <div class="repeat-card__head">
-                <strong>短笺卡片</strong>
-                <button class="link-button" data-action="remove" type="button">删除</button>
-            </div> 
-            <label>小标题<input data-field="title" type="text" placeholder="想对你说"></label>
-            <label>内容<textarea data-field="content" rows="4" placeholder="写下一段想说的话"></textarea></label>
-        </article>
-    </template>
-
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+    <script src="js/site-data.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

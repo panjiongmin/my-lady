@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Love Site</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Noto+Serif+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="editor-page-body">
+    <main class="editor-page">
+        <section class="editor-page__hero">
+            <p class="eyebrow">PRIVATE EDITOR</p>
+            <h1>Edit Love Site</h1>
+            <p>Manage text and images here, save locally, or create a share link so the other person can open the same content.</p>
+            <div class="editor-page__actions">
+                <a class="button button--primary" href="./index.html">Open Site</a>
+                <button class="button button--ghost" id="copy-share-link" type="button">Copy Share Link</button>
+            </div>
+            <p class="editor-page__hint" id="share-status">Content is still saved in this browser by default. Send the share link if you want the other person to see the same images and text.</p>
+        </section>
+
+        <section class="editor-page__panel">
+            <form class="editor-page__form" id="editor-form">
+                <section class="editor-group">
+                    <h3>Basic Info</h3>
+                    <label>Site title<input id="site-title-input" name="siteTitle" type="text"></label>
+                    <label>Hero badge<input id="hero-badge-input" name="heroBadge" type="text"></label>
+                    <label>Hero title<input id="hero-title-input" name="heroTitle" type="text"></label>
+                    <label>Hero subtitle<textarea id="hero-subtitle-input" name="heroSubtitle" rows="3"></textarea></label>
+                    <label>Hero description<textarea id="hero-description-input" name="heroDescription" rows="5"></textarea></label>
+                    <label>Date together<input id="anniversary-input" name="anniversaryDate" type="datetime-local"></label>
+                    <label>Footer text<input id="footer-text-input" name="footerText" type="text"></label>
+                </section>
+
+                <section class="editor-group">
+                    <h3>People & Cover</h3>
+                    <label>Left name<input id="person-a-name-input" name="personAName" type="text"></label>
+                    <label>Left avatar URL<input id="person-a-image-input" name="personAImage" type="url" placeholder="https://..."></label>
+                    <label class="upload-field">Upload left avatar<input id="person-a-upload-input" accept="image/*" type="file"></label>
+                    <label>Right name<input id="person-b-name-input" name="personBName" type="text"></label>
+                    <label>Right avatar URL<input id="person-b-image-input" name="personBImage" type="url" placeholder="https://..."></label>
+                    <label class="upload-field">Upload right avatar<input id="person-b-upload-input" accept="image/*" type="file"></label>
+                    <label>Hero background URL<input id="hero-image-input" name="heroImage" type="url" placeholder="https://..."></label>
+                    <label class="upload-field">Upload hero background<input id="hero-upload-input" accept="image/*" type="file"></label>
+                </section>
+
+                <section class="editor-group">
+                    <div class="editor-group__head">
+                        <h3>Timeline</h3>
+                        <button class="button button--small" id="add-timeline-item" type="button">Add Event</button>
+                    </div>
+                    <div class="repeat-list" id="timeline-editor-list"></div>
+                </section>
+
+                <section class="editor-group">
+                    <div class="editor-group__head">
+                        <h3>Gallery</h3>
+                        <button class="button button--small" id="add-gallery-item" type="button">Add Photo</button>
+                    </div>
+                    <div class="repeat-list" id="gallery-editor-list"></div>
+                </section>
+
+                <section class="editor-group">
+                    <div class="editor-group__head">
+                        <h3>Notes</h3>
+                        <button class="button button--small" id="add-note-item" type="button">Add Note</button>
+                    </div>
+                    <div class="repeat-list" id="note-editor-list"></div>
+                </section>
+            </form>
+
+            <div class="editor-page__footer">
+                <div class="editor__tools">
+                    <button class="button button--ghost editor-page__ghost" id="export-json" type="button">Export JSON</button>
+                    <label class="button button--ghost file-button editor-page__ghost" for="import-json">Import JSON</label>
+                    <input class="hidden-input" id="import-json" accept="application/json" type="file">
+                    <button class="button button--ghost editor-page__ghost" id="reset-content" type="button">Reset</button>
+                </div>
+                <button class="button button--primary editor-page__save" id="save-editor" type="button">Save</button>
+            </div>
+        </section>
+    </main>
+
+    <template id="timeline-editor-template">
+        <article class="repeat-card">
+            <div class="repeat-card__head">
+                <strong>Timeline Event</strong>
+                <button class="link-button" data-action="remove" type="button">Remove</button>
+            </div>
+            <label>Date<input data-field="date" type="text" placeholder="2026.04.16"></label>
+            <label>Title<input data-field="title" type="text" placeholder="First Date"></label>
+            <label>Description<textarea data-field="description" rows="3" placeholder="What happened on this day"></textarea></label>
+        </article>
+    </template>
+
+    <template id="gallery-editor-template">
+        <article class="repeat-card">
+            <div class="repeat-card__head">
+                <strong>Gallery Item</strong>
+                <button class="link-button" data-action="remove" type="button">Remove</button>
+            </div>
+            <label>Title<input data-field="title" type="text" placeholder="Beach Night"></label>
+            <label>Description<textarea data-field="description" rows="2" placeholder="Story behind this photo"></textarea></label>
+            <label>Image URL<input data-field="image" type="url" placeholder="https://..."></label>
+            <label class="upload-field">Upload image<input data-field="upload" accept="image/*" type="file"></label>
+        </article>
+    </template>
+
+    <template id="note-editor-template">
+        <article class="repeat-card">
+            <div class="repeat-card__head">
+                <strong>Note Card</strong>
+                <button class="link-button" data-action="remove" type="button">Remove</button>
+            </div>
+            <label>Title<input data-field="title" type="text" placeholder="A note for you"></label>
+            <label>Content<textarea data-field="content" rows="4" placeholder="Write something here"></textarea></label>
+        </article>
+    </template>
+
+    <script src="js/site-data.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>
