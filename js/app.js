@@ -12,6 +12,7 @@ const state = {
 const dom = {};
 let counterTimer = null;
 let gsapContext = null;
+let anniversaryDateWarned = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     cacheDom();
@@ -214,7 +215,15 @@ function startCounter() {
 function updateCounter() {
     const target = new Date(state.content.anniversaryDate).getTime();
     const now = Date.now();
-    const diff = Number.isNaN(target) ? 0 : Math.max(now - target, 0);
+    const isInvalidDate = Number.isNaN(target);
+    const diff = isInvalidDate ? 0 : Math.max(now - target, 0);
+
+    if (isInvalidDate && !anniversaryDateWarned) {
+        anniversaryDateWarned = true;
+        if (typeof globalThis.alert === "function") {
+            globalThis.alert("The anniversary date is invalid. Please update it in the editor.");
+        }
+    }
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
