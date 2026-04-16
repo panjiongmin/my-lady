@@ -1,93 +1,94 @@
 (function () {
     const STORAGE_KEY = "our-love-site-content-v1";
+    const REPOSITORY_CONTENT_PATH = "data/site-content.json";
 
     const defaultContent = {
-        siteTitle: "Our Love Story",
+        siteTitle: "我们的恋爱小站",
         hero: {
-            badge: "FOR THE TWO OF US",
-            title: "A little place for every moment we keep choosing each other.",
-            subtitle: "From first hellos to ordinary evenings, this page keeps the memories, photos, and notes that make your story feel like home.",
-            description: "Edit the content, save it in the browser, or share it with a link so the same story can be opened on another device.",
+            badge: "只属于我们的故事",
+            title: "把心动、纪念日和想念，都认真留在这里。",
+            subtitle: "这里是属于我们的恋爱角落，记录相遇、陪伴、惊喜和那些平凡却闪闪发光的日常。",
+            description: "你可以在编辑页修改文字和图片，保存到本地，或者生成分享链接，让对方也能看到同样的内容。",
             backgroundImage: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=1600&q=80",
             personA: {
-                name: "Alex",
+                name: "男主角",
                 image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80"
             },
             personB: {
-                name: "Mia",
+                name: "女主角",
                 image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80"
             }
         },
         counter: {
-            title: "Time We Have Loved",
-            description: "A live counter for the days, hours, minutes, and seconds since your anniversary began."
+            title: "我们已经在一起",
+            description: "从确定心意的那一刻开始，往后的每一天、每一小时、每一分钟都值得被珍藏。"
         },
         anniversaryDate: "2024-05-20T20:00",
         timeline: {
-            title: "Our Timeline",
-            description: "A few chapters that turned into the story you are still writing together."
+            title: "我们的故事线",
+            description: "从第一次认真聊天，到后来的每一次靠近，这些瞬间慢慢变成了我们的故事。"
         },
         timelineItems: [
             {
                 date: "2024.03.18",
-                title: "The First Real Conversation",
-                description: "A message turned into a late-night chat, and suddenly time felt a little lighter."
+                title: "第一次聊到舍不得说晚安",
+                description: "原本只是随口说几句，后来却越聊越晚，像是故事从那天开始悄悄按下了开始键。"
             },
             {
                 date: "2024.05.20",
-                title: "The Day We Made It Official",
-                description: "You chose a date to remember, and everything after that started feeling like a shared future."
+                title: "正式在一起",
+                description: "这一天有了特别的名字，也让以后的日子都多了一层温柔又坚定的意义。"
             },
             {
                 date: "2024.08.12",
-                title: "A Favorite Day Out",
-                description: "Photos, snacks, a long walk, and the kind of calm that only happens with the right person."
+                title: "一次难忘的约会",
+                description: "一起散步、拍照、吃喜欢的东西，原来和对的人在一起，连平常的一天都会发光。"
             }
         ],
         gallery: {
-            title: "Photo Album",
-            description: "Small snapshots of trips, quiet dates, and the ordinary scenes worth keeping."
+            title: "回忆相册",
+            description: "把那些值得反复翻看的瞬间都放进来，留给以后慢慢回味。"
         },
         galleryItems: [
             {
-                title: "Golden Hour Walk",
-                description: "The light was soft, the road was quiet, and everything felt easy.",
+                title: "傍晚散步",
+                description: "天色刚刚好，风也很温柔，和你一起走的路总会变得特别一点。",
                 image: "https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=900&q=80"
             },
             {
-                title: "Weekend Coffee Date",
-                description: "A slow afternoon, two drinks, and stories that kept stretching past sunset.",
+                title: "周末咖啡约会",
+                description: "一杯咖啡，一整个下午，还有那些怎么都聊不完的话题。",
                 image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80"
             },
             {
-                title: "City Lights",
-                description: "One of those nights that looked simple in photos but felt unforgettable in person.",
+                title: "夜晚的城市灯光",
+                description: "照片也许拍不出当时的心情，但那一晚的心动会一直记得。",
                 image: "https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=900&q=80"
             }
         ],
         notes: {
-            title: "Love Notes",
-            description: "A few words for the moments when photos are not enough and feelings deserve a place to stay."
+            title: "想对你说的话",
+            description: "有些话不一定每天都说出口，但我想把它们认真地留在这里。"
         },
         noteItems: [
             {
-                title: "Thank You for the Ordinary Days",
-                content: "You make routine days softer, funnier, and much more meaningful than they used to be."
+                title: "谢谢你出现",
+                content: "谢谢你把普通的日子变得值得期待，也谢谢你让我的生活里多了很多温柔和开心。"
             },
             {
-                title: "You Still Surprise Me",
-                content: "Even now, there are new little things about you that keep me curious and grateful."
+                title: "和你在一起很安心",
+                content: "你的陪伴总会让我觉得很踏实，好像很多烦恼在你身边都会慢慢变轻。"
             },
             {
-                title: "For the Next Chapter",
-                content: "No matter how busy life gets, I hope we keep building something gentle, brave, and real together."
+                title: "以后也请多多指教",
+                content: "不管未来会遇到什么，我都想和你一起慢慢走，把喜欢过成很久很久的日常。"
             }
         ],
-        footerText: "Love is built in ordinary days, one memory at a time."
+        footerText: "喜欢不是一瞬间的热闹，而是很多普通日子里的认真陪伴。"
     };
 
-    function mergeContent(input) {
-        const merged = structuredClone(defaultContent);
+    function mergeContentWithBase(baseContent, input) {
+        const merged = structuredClone(baseContent);
         if (!input || typeof input !== "object") {
             return merged;
         }
@@ -121,13 +122,36 @@
         return merged;
     }
 
-    function loadContent() {
+    function mergeContent(input) {
+        return mergeContentWithBase(defaultContent, input);
+    }
+
+    async function loadRepositoryContent() {
+        if (typeof globalThis.fetch !== "function") {
+            return structuredClone(defaultContent);
+        }
+
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return structuredClone(defaultContent);
-            return mergeContent(JSON.parse(saved));
+            const response = await globalThis.fetch(REPOSITORY_CONTENT_PATH, { cache: "no-store" });
+            if (!response.ok) {
+                return structuredClone(defaultContent);
+            }
+
+            return mergeContent(await response.json());
         } catch (_error) {
             return structuredClone(defaultContent);
+        }
+    }
+
+    async function loadContent() {
+        const repositoryContent = await loadRepositoryContent();
+
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return repositoryContent;
+            return mergeContentWithBase(repositoryContent, JSON.parse(saved));
+        } catch (_error) {
+            return repositoryContent;
         }
     }
 
@@ -207,8 +231,10 @@
 
     globalThis.LoveSiteData = {
         STORAGE_KEY,
+        REPOSITORY_CONTENT_PATH,
         defaultContent,
         mergeContent,
+        loadRepositoryContent,
         loadContent,
         persistContent,
         encodeSharePayload,

@@ -8,12 +8,13 @@ const {
 } = globalThis.LoveSiteData;
 
 const state = {
-    content: loadContent()
+    content: null
 };
 
 const dom = {};
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    state.content = await loadContent();
     cacheDom();
     bindEvents();
     fillEditor();
@@ -181,9 +182,9 @@ function saveEditorContent(options = {}) {
     state.content = nextContent;
     persistContent(state.content);
     fillEditor();
-    setShareStatus("Saved in this browser. Send the share link if you want the other person to see the same content.");
+    setShareStatus("内容已保存到当前浏览器。如果想同步给所有访问者，请导出 JSON 后覆盖仓库里的 data/site-content.json 并提交。");
     if (!options.silent) {
-        globalThis.alert("Saved locally. Copy the share link and send it to the other person.");
+        globalThis.alert("已保存到本地浏览器。想同步到网站和代码仓库时，请导出 JSON，覆盖 data/site-content.json 后提交。");
     }
 }
 
@@ -202,9 +203,10 @@ function exportJson() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "love-site-content.json";
+    link.download = "site-content.json";
     link.click();
     URL.revokeObjectURL(url);
+    setShareStatus("已导出 site-content.json。把它覆盖到仓库里的 data/site-content.json 并提交后，所有人都会看到这份内容。");
 }
 
 async function copyShareLink() {
@@ -212,15 +214,15 @@ async function copyShareLink() {
 
     const shareUrl = buildShareUrl(state.content, "index.html");
     if (shareUrl.length > 180000) {
-        setShareStatus("The share link may be too long because the images are large. Compress the images if needed.");
+        setShareStatus("分享链接可能过长，通常是因为图片太大。可以先压缩图片后再生成分享链接。");
     }
 
     try {
         await globalThis.navigator.clipboard.writeText(shareUrl);
-        setShareStatus("Share link copied. Send it to the other person and they will see the same images and text.");
+        setShareStatus("分享链接已复制。把它发给对方后，对方就能看到同样的文字和图片。");
     } catch (_error) {
-        setShareStatus(`Copy failed. Please copy this link manually: ${shareUrl}`);
-        globalThis.prompt("Copy this share link and send it to the other person:", shareUrl);
+        setShareStatus(`复制失败，请手动复制这个链接：${shareUrl}`);
+        globalThis.prompt("请复制这个分享链接并发给对方：", shareUrl);
     }
 }
 
@@ -235,10 +237,10 @@ function importJson(event) {
             state.content = mergeContent(parsed);
             persistContent(state.content);
             fillEditor();
-            setShareStatus("Import completed. You can now copy the share link.");
-            globalThis.alert("Import completed.");
+            setShareStatus("导入完成，现在可以复制分享链接发给对方。");
+            globalThis.alert("导入完成。");
         } catch (_error) {
-            globalThis.alert("JSON parse failed. Please check the file format.");
+            globalThis.alert("JSON 解析失败，请检查文件格式是否正确。");
         } finally {
             event.target.value = "";
         }
@@ -247,13 +249,13 @@ function importJson(event) {
 }
 
 function resetContent() {
-    const shouldReset = globalThis.confirm("Reset to default content? Local changes in this browser will be cleared.");
+    const shouldReset = globalThis.confirm("要恢复默认内容吗？当前浏览器里的本地修改会被清空。");
     if (!shouldReset) return;
 
     state.content = structuredClone(defaultContent);
     persistContent(state.content);
     fillEditor();
-    setShareStatus("Reset to default content.");
+    setShareStatus("已恢复为默认内容。");
 }
 
 function setShareStatus(message) {

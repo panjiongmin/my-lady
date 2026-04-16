@@ -6,7 +6,7 @@ const {
 } = globalThis.LoveSiteData;
 
 const state = {
-    content: loadSharedContentFromUrl() || loadContent()
+    content: null
 };
 
 const dom = {};
@@ -14,7 +14,8 @@ let counterTimer = null;
 let gsapContext = null;
 let anniversaryDateWarned = false;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    state.content = loadSharedContentFromUrl() || await loadContent();
     cacheDom();
     renderPage();
     startCounter();
@@ -221,7 +222,7 @@ function updateCounter() {
     if (isInvalidDate && !anniversaryDateWarned) {
         anniversaryDateWarned = true;
         if (typeof globalThis.alert === "function") {
-            globalThis.alert("The anniversary date is invalid. Please update it in the editor.");
+            globalThis.alert("纪念日日期无效，请到编辑页重新设置。");
         }
     }
 
