@@ -5,9 +5,7 @@
     "singleQuote": false
   },
   "lint": {
-    "files": {
-      "include": ["js/**/*.js", "tests/**/*.ts"]
-    }
+    "include": ["js/**/*.js", "tests/**/*.ts"]
   },
   "test": {
     "include": ["tests/**/*.ts"]
