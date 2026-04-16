@@ -377,23 +377,23 @@ function closeEditor() {
 }
 
 function initGsapAnimations() {
-    if (!window.gsap) {
+    if (!globalThis.gsap) {
         return;
     }
 
-    if (window.ScrollTrigger) {
-        window.gsap.registerPlugin(window.ScrollTrigger);
+    if (globalThis.ScrollTrigger) {
+        globalThis.gsap.registerPlugin(globalThis.ScrollTrigger);
     }
 
     buildGsapAnimations();
 }
 
 function refreshGsapAnimations() {
-    if (!window.gsap) {
+    if (!globalThis.gsap) {
         return;
     }
 
-    window.requestAnimationFrame(() => {
+    globalThis.requestAnimationFrame(() => {
         buildGsapAnimations();
     });
 }
@@ -403,9 +403,9 @@ function buildGsapAnimations() {
         gsapContext.revert();
     }
 
-    gsapContext = window.gsap.context(() => {
-        const gsap = window.gsap;
-        const ScrollTrigger = window.ScrollTrigger;
+    gsapContext = globalThis.gsap.context(() => {
+        const gsap = globalThis.gsap;
+        const ScrollTrigger = globalThis.ScrollTrigger;
 
         gsap.set([
             ".hero__decor .sticker",
@@ -574,10 +574,10 @@ function startCounter() {
 
 function restartCounter() {
     if (counterTimer) {
-        window.clearInterval(counterTimer);
+        globalThis.clearInterval(counterTimer);
     }
     updateCounter();
-    counterTimer = window.setInterval(updateCounter, 1000);
+    counterTimer = globalThis.setInterval(updateCounter, 1000);
 }
 
 function updateCounter() {
@@ -619,8 +619,8 @@ function importJson(event) {
             renderPage();
             fillEditor();
             restartCounter();
-        } catch (error) {
-            window.alert("JSON 解析失败，请确认文件格式正确。");
+        } catch (_error) {
+            globalThis.alert("JSON 解析失败，请确认文件格式正确。");
         } finally {
             event.target.value = "";
         }
@@ -629,7 +629,7 @@ function importJson(event) {
 }
 
 function resetContent() {
-    const shouldReset = window.confirm("确认恢复默认内容吗？当前浏览器中的修改会被清空。");
+    const shouldReset = globalThis.confirm("确认恢复默认内容吗？当前浏览器中的修改会被清空。");
     if (!shouldReset) return;
 
     state.content = structuredClone(defaultContent);
@@ -648,7 +648,7 @@ function loadContent() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (!saved) return structuredClone(defaultContent);
         return mergeContent(JSON.parse(saved));
-    } catch (error) {
+    } catch (_error) {
         return structuredClone(defaultContent);
     }
 }
