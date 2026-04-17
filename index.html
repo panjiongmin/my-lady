@@ -34,8 +34,11 @@
                 <p class="hero__description" id="hero-description"></p>
                 <div class="hero__actions">
                     <a class="button button--primary" href="#timeline">翻看回忆</a>
-                    <a class="button button--ghost" href="./editor.html">编辑云端内容</a>
+                    <a class="button button--ghost hidden" href="./editor.html" id="edit-link">编辑云端内容</a>
+                    <button class="button button--ghost" id="login-button" type="button">情侣登录</button>
+                    <button class="button button--ghost hidden" id="logout-button" type="button">退出登录</button>
                 </div>
+                <p class="hero__login-status" id="login-status"></p>
                 <div class="hero__meta">
                     <article class="person-card">
                         <img id="person-a-image" alt="恋人 A">
@@ -114,9 +117,27 @@
         </footer>
     </div>
 
+    <div class="auth-modal hidden" id="auth-modal" aria-hidden="true">
+        <div class="auth-modal__backdrop" id="auth-modal-backdrop"></div>
+        <section class="auth-modal__card" aria-labelledby="auth-title">
+            <button class="auth-modal__close" id="auth-close" type="button" aria-label="关闭登录框">×</button>
+            <p class="eyebrow">PRIVATE LOGIN</p>
+            <h2 id="auth-title">情侣专属登录</h2>
+            <p class="auth-modal__text">只有配置在代码里的情侣账号可以进入编辑页，登录状态会保存在当前浏览器。</p>
+            <form class="auth-form" id="auth-form">
+                <label>用户名<input id="auth-username" autocomplete="username" type="text" required></label>
+                <label>密码<input id="auth-password" autocomplete="current-password" type="password" required></label>
+                <p class="auth-form__status" id="auth-status"></p>
+                <button class="button button--primary" type="submit">登录</button>
+            </form>
+        </section>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-service.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-service.js"></script>
     <script src="js/site-data.js"></script>

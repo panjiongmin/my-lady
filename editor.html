@@ -19,12 +19,28 @@
             <div class="editor-page__actions">
                 <a class="button button--primary" href="./index.html">打开首页</a>
                 <button class="button button--ghost" id="copy-share-link" type="button">复制分享链接</button>
+                <button class="button button--ghost hidden" id="editor-logout-button" type="button">退出登录</button>
             </div>
             <p class="editor-page__hint" id="cloud-hint">正在检查 Supabase 配置...</p>
             <p class="editor-page__hint" id="share-status">你也可以继续用分享链接把当前内容单独发给对方。</p>
+            <p class="editor-page__hint" id="editor-auth-status">正在检查登录状态...</p>
         </section>
 
-        <section class="editor-page__panel">
+        <section class="editor-page__panel hidden" id="editor-login-panel">
+            <div class="editor-login">
+                <p class="eyebrow">LOGIN REQUIRED</p>
+                <h2>先登录再编辑</h2>
+                <p>这个编辑页只开放给情侣双方账号。登录状态会保存在当前浏览器里，之后打开会自动保持。</p>
+                <form class="auth-form" id="editor-auth-form">
+                    <label>用户名<input id="editor-auth-username" autocomplete="username" type="text" required></label>
+                    <label>密码<input id="editor-auth-password" autocomplete="current-password" type="password" required></label>
+                    <p class="auth-form__status" id="editor-auth-form-status"></p>
+                    <button class="button button--primary" type="submit">登录并进入编辑页</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="editor-page__panel hidden" id="editor-content-panel">
             <form class="editor-page__form" id="editor-form">
                 <section class="editor-group">
                     <h3>基础信息</h3>
@@ -123,6 +139,8 @@
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-service.js"></script>
     <script src="js/supabase-config.js"></script>
     <script src="js/supabase-service.js"></script>
     <script src="js/site-data.js"></script>

@@ -8,6 +8,7 @@ Deno.test("index.html loads app.js, gsap, and supabase scripts", async () => {
   assertStringIncludes(html, "ScrollTrigger.min.js");
   assertStringIncludes(html, "@supabase/supabase-js");
   assertStringIncludes(html, "js/supabase-service.js");
+  assertStringIncludes(html, "js/auth-service.js");
 });
 
 Deno.test("app.js uses globalThis for web APIs", async () => {
@@ -25,4 +26,5 @@ Deno.test("editor.js references Supabase save flow", async () => {
   assertStringIncludes(script, "saveCloudContent");
   assertStringIncludes(script, "uploadImage");
   assertStringIncludes(script, "buildShareUrl");
+  assertStringIncludes(script, "handleEditorLogin");
 });

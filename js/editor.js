@@ -13,21 +13,30 @@ const {
     uploadImage,
     getConfig
 } = globalThis.LoveSiteSupabase;
+const { getSession, login, logout } = globalThis.LoveSiteAuth;
 
 const state = {
     content: null,
     saving: false,
-    uploading: false
+    uploading: false,
+    session: null
 };
 
 const dom = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
-    state.content = await resolveInitialContent();
     cacheDom();
+    state.session = getSession();
+    bindAuthEvents();
+    if (state.session) {
+        state.content = await resolveInitialContent();
+    } else {
+        state.content = loadLocalContent();
+    }
     bindEvents();
     fillEditor();
     updateCloudHint();
+    updateAuthUi();
 });
 
 async function resolveInitialContent() {
@@ -54,8 +63,16 @@ function cacheDom() {
     dom.importJson = byId("import-json");
     dom.resetContent = byId("reset-content");
     dom.copyShareLink = byId("copy-share-link");
+    dom.editorLogoutButton = byId("editor-logout-button");
     dom.shareStatus = byId("share-status");
     dom.cloudHint = byId("cloud-hint");
+    dom.editorAuthStatus = byId("editor-auth-status");
+    dom.editorLoginPanel = byId("editor-login-panel");
+    dom.editorContentPanel = byId("editor-content-panel");
+    dom.editorAuthForm = byId("editor-auth-form");
+    dom.editorAuthUsername = byId("editor-auth-username");
+    dom.editorAuthPassword = byId("editor-auth-password");
+    dom.editorAuthFormStatus = byId("editor-auth-form-status");
     dom.addTimelineItem = byId("add-timeline-item");
     dom.addGalleryItem = byId("add-gallery-item");
     dom.addNoteItem = byId("add-note-item");
@@ -76,6 +93,11 @@ function cacheDom() {
     dom.personBUploadInput = byId("person-b-upload-input");
     dom.heroImageInput = byId("hero-image-input");
     dom.heroUploadInput = byId("hero-upload-input");
+}
+
+function bindAuthEvents() {
+    dom.editorAuthForm.addEventListener("submit", handleEditorLogin);
+    dom.editorLogoutButton.addEventListener("click", handleEditorLogout);
 }
 
 function bindEvents() {
@@ -212,6 +234,7 @@ async function handleSingleImageUpload(event, targetInput, folder) {
 }
 
 async function saveEditorContent(options = {}) {
+    if (!state.session) return;
     if (state.saving) return;
 
     state.saving = true;
@@ -287,6 +310,7 @@ function readRepeatValues(container, fields) {
 }
 
 function exportJson() {
+    if (!state.session) return;
     const content = buildContentFromForm();
     const blob = new Blob([JSON.stringify(content, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -299,6 +323,7 @@ function exportJson() {
 }
 
 async function copyShareLink() {
+    if (!state.session) return;
     state.content = buildContentFromForm();
     persistContent(state.content);
 
@@ -319,6 +344,7 @@ async function copyShareLink() {
 }
 
 function importJson(event) {
+    if (!state.session) return;
     const [file] = event.target.files;
     if (!file) return;
 
@@ -342,6 +368,7 @@ function importJson(event) {
 }
 
 function resetContent() {
+    if (!state.session) return;
     const shouldReset = globalThis.confirm("确认恢复默认内容吗？当前浏览器中的本地修改会被清空。"
     );
     if (!shouldReset) return;
@@ -364,6 +391,43 @@ function updateCloudHint() {
 
     dom.cloudHint.textContent = "Supabase 尚未配置。请先在 js/supabase-config.js 填入 url 和 anonKey。";
     dom.cloudHint.dataset.state = "pending";
+}
+
+function updateAuthUi() {
+    const loggedIn = Boolean(state.session);
+
+    dom.editorLoginPanel.classList.toggle("hidden", loggedIn);
+    dom.editorContentPanel.classList.toggle("hidden", !loggedIn);
+    dom.editorLogoutButton.classList.toggle("hidden", !loggedIn);
+    dom.editorAuthStatus.textContent = loggedIn
+        ? `已登录：${state.session.displayName}。当前浏览器会长期保持登录状态。`
+        : "未登录。只有情侣双方账号可以进入编辑页。";
+}
+
+async function handleEditorLogin(event) {
+    event.preventDefault();
+
+    const result = login(dom.editorAuthUsername.value, dom.editorAuthPassword.value);
+    if (!result.ok) {
+        dom.editorAuthFormStatus.textContent = result.error;
+        return;
+    }
+
+    state.session = result.data;
+    dom.editorAuthFormStatus.textContent = "";
+    state.content = await resolveInitialContent();
+    fillEditor();
+    updateCloudHint();
+    updateAuthUi();
+}
+
+function handleEditorLogout() {
+    logout();
+    state.session = null;
+    state.content = loadLocalContent();
+    fillEditor();
+    updateCloudHint();
+    updateAuthUi();
 }
 
 function updateSaveButton() {

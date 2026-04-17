@@ -6,6 +6,7 @@
     escapeAttribute
 } = globalThis.LoveSiteData;
 const { isConfigured, loadCloudContent } = globalThis.LoveSiteSupabase;
+const { getSession, login, logout } = globalThis.LoveSiteAuth;
 
 const state = {
     content: null
@@ -15,11 +16,15 @@ const dom = {};
 let counterTimer = null;
 let gsapContext = null;
 let anniversaryDateWarned = false;
+let currentSession = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
     state.content = await resolveInitialContent();
     cacheDom();
+    currentSession = getSession();
+    bindAuthEvents();
     renderPage();
+    updateAuthUi();
     startCounter();
     initGsapAnimations();
 });
@@ -69,6 +74,69 @@ function cacheDom() {
     dom.notesDescription = byId("notes-description");
     dom.notesList = byId("notes-list");
     dom.footerText = byId("footer-text");
+    dom.editLink = byId("edit-link");
+    dom.loginButton = byId("login-button");
+    dom.logoutButton = byId("logout-button");
+    dom.loginStatus = byId("login-status");
+    dom.authModal = byId("auth-modal");
+    dom.authModalBackdrop = byId("auth-modal-backdrop");
+    dom.authClose = byId("auth-close");
+    dom.authForm = byId("auth-form");
+    dom.authUsername = byId("auth-username");
+    dom.authPassword = byId("auth-password");
+    dom.authStatus = byId("auth-status");
+}
+
+function bindAuthEvents() {
+    dom.loginButton.addEventListener("click", openAuthModal);
+    dom.logoutButton.addEventListener("click", handleLogout);
+    dom.authClose.addEventListener("click", closeAuthModal);
+    dom.authModalBackdrop.addEventListener("click", closeAuthModal);
+    dom.authForm.addEventListener("submit", handleAuthSubmit);
+}
+
+function updateAuthUi() {
+    const loggedIn = Boolean(currentSession);
+
+    dom.editLink.classList.toggle("hidden", !loggedIn);
+    dom.logoutButton.classList.toggle("hidden", !loggedIn);
+    dom.loginButton.classList.toggle("hidden", loggedIn);
+    dom.loginStatus.textContent = loggedIn
+        ? `已登录：${currentSession.displayName}。当前浏览器会长期保持登录状态。`
+        : "未登录时只能浏览首页。登录后才会显示编辑入口。";
+}
+
+function openAuthModal() {
+    dom.authModal.classList.remove("hidden");
+    dom.authModal.setAttribute("aria-hidden", "false");
+    dom.authStatus.textContent = "";
+    dom.authForm.reset();
+    dom.authUsername.focus();
+}
+
+function closeAuthModal() {
+    dom.authModal.classList.add("hidden");
+    dom.authModal.setAttribute("aria-hidden", "true");
+}
+
+function handleAuthSubmit(event) {
+    event.preventDefault();
+
+    const result = login(dom.authUsername.value, dom.authPassword.value);
+    if (!result.ok) {
+        dom.authStatus.textContent = result.error;
+        return;
+    }
+
+    currentSession = result.data;
+    updateAuthUi();
+    closeAuthModal();
+}
+
+function handleLogout() {
+    logout();
+    currentSession = null;
+    updateAuthUi();
 }
 
 function renderPage() {
