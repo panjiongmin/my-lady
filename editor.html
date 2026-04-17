@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>恋爱小站编辑器</title>
+    <title>编辑恋爱小站</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,25 +13,26 @@
 <body class="editor-page-body">
     <main class="editor-page">
         <section class="editor-page__hero">
-            <p class="eyebrow">专属编辑页</p>
-            <h1>恋爱小站编辑器</h1>
-            <p>你可以在这里修改文字和图片，先保存到本地，也可以生成分享链接；如果想让部署页对所有人同步生效，请导出 JSON 后覆盖仓库里的 <code>data/site-content.json</code> 并提交。</p>
+            <p class="eyebrow">PRIVATE EDITOR</p>
+            <h1>编辑情侣小站</h1>
+            <p>这里现在会优先连接 Supabase。你保存文字、上传图片后，对方打开首页就能直接看到最新内容。</p>
             <div class="editor-page__actions">
-                <a class="button button--primary" href="./index.html">打开主页</a>
+                <a class="button button--primary" href="./index.html">打开首页</a>
                 <button class="button button--ghost" id="copy-share-link" type="button">复制分享链接</button>
             </div>
-            <p class="editor-page__hint" id="share-status">默认只保存在当前浏览器里。如果想让对方看到同样的文字和图片，请把分享链接发给对方。</p>
+            <p class="editor-page__hint" id="cloud-hint">正在检查 Supabase 配置...</p>
+            <p class="editor-page__hint" id="share-status">你也可以继续用分享链接把当前内容单独发给对方。</p>
         </section>
 
         <section class="editor-page__panel">
             <form class="editor-page__form" id="editor-form">
                 <section class="editor-group">
                     <h3>基础信息</h3>
-                    <label>站点标题<input id="site-title-input" name="siteTitle" type="text"></label>
-                    <label>头图角标<input id="hero-badge-input" name="heroBadge" type="text"></label>
-                    <label>头图标题<input id="hero-title-input" name="heroTitle" type="text"></label>
-                    <label>头图副标题<textarea id="hero-subtitle-input" name="heroSubtitle" rows="3"></textarea></label>
-                    <label>头图说明<textarea id="hero-description-input" name="heroDescription" rows="5"></textarea></label>
+                    <label>网站标题<input id="site-title-input" name="siteTitle" type="text"></label>
+                    <label>开场标签<input id="hero-badge-input" name="heroBadge" type="text"></label>
+                    <label>开场主标题<input id="hero-title-input" name="heroTitle" type="text"></label>
+                    <label>开场副标题<textarea id="hero-subtitle-input" name="heroSubtitle" rows="3"></textarea></label>
+                    <label>开场介绍<textarea id="hero-description-input" name="heroDescription" rows="5"></textarea></label>
                     <label>在一起日期<input id="anniversary-input" name="anniversaryDate" type="datetime-local"></label>
                     <label>页脚文案<input id="footer-text-input" name="footerText" type="text"></label>
                 </section>
@@ -44,8 +45,8 @@
                     <label>右侧名字<input id="person-b-name-input" name="personBName" type="text"></label>
                     <label>右侧头像链接<input id="person-b-image-input" name="personBImage" type="url" placeholder="https://..."></label>
                     <label class="upload-field">上传右侧头像<input id="person-b-upload-input" accept="image/*" type="file"></label>
-                    <label>头图背景链接<input id="hero-image-input" name="heroImage" type="url" placeholder="https://..."></label>
-                    <label class="upload-field">上传头图背景<input id="hero-upload-input" accept="image/*" type="file"></label>
+                    <label>封面背景图链接<input id="hero-image-input" name="heroImage" type="url" placeholder="https://..."></label>
+                    <label class="upload-field">上传封面背景图<input id="hero-upload-input" accept="image/*" type="file"></label>
                 </section>
 
                 <section class="editor-group">
@@ -66,8 +67,8 @@
 
                 <section class="editor-group">
                     <div class="editor-group__head">
-                        <h3>留言卡</h3>
-                        <button class="button button--small" id="add-note-item" type="button">新增留言</button>
+                        <h3>短笺</h3>
+                        <button class="button button--small" id="add-note-item" type="button">新增卡片</button>
                     </div>
                     <div class="repeat-list" id="note-editor-list"></div>
                 </section>
@@ -80,7 +81,7 @@
                     <input class="hidden-input" id="import-json" accept="application/json" type="file">
                     <button class="button button--ghost editor-page__ghost" id="reset-content" type="button">恢复默认</button>
                 </div>
-                <button class="button button--primary editor-page__save" id="save-editor" type="button">保存内容</button>
+                <button class="button button--primary editor-page__save" id="save-editor" type="button">保存到云端</button>
             </div>
         </section>
     </main>
@@ -92,8 +93,8 @@
                 <button class="link-button" data-action="remove" type="button">删除</button>
             </div>
             <label>日期<input data-field="date" type="text" placeholder="2026.04.16"></label>
-            <label>标题<input data-field="title" type="text" placeholder="第一次正式约会"></label>
-            <label>描述<textarea data-field="description" rows="3" placeholder="写下这一天发生了什么"></textarea></label>
+            <label>标题<input data-field="title" type="text" placeholder="第一次约会"></label>
+            <label>描述<textarea data-field="description" rows="3" placeholder="记录这一天发生了什么"></textarea></label>
         </article>
     </template>
 
@@ -103,8 +104,8 @@
                 <strong>相册项目</strong>
                 <button class="link-button" data-action="remove" type="button">删除</button>
             </div>
-            <label>标题<input data-field="title" type="text" placeholder="海边的夜晚"></label>
-            <label>描述<textarea data-field="description" rows="2" placeholder="写下这张照片背后的故事"></textarea></label>
+            <label>标题<input data-field="title" type="text" placeholder="海边晚风"></label>
+            <label>描述<textarea data-field="description" rows="2" placeholder="这张照片背后的故事"></textarea></label>
             <label>图片链接<input data-field="image" type="url" placeholder="https://..."></label>
             <label class="upload-field">上传图片<input data-field="upload" accept="image/*" type="file"></label>
         </article>
@@ -113,14 +114,17 @@
     <template id="note-editor-template">
         <article class="repeat-card">
             <div class="repeat-card__head">
-                <strong>留言卡片</strong>
+                <strong>短笺卡片</strong>
                 <button class="link-button" data-action="remove" type="button">删除</button>
             </div>
-            <label>标题<input data-field="title" type="text" placeholder="想对你说的话"></label>
-            <label>内容<textarea data-field="content" rows="4" placeholder="把想说的话写在这里"></textarea></label>
+            <label>小标题<input data-field="title" type="text" placeholder="想对你说"></label>
+            <label>内容<textarea data-field="content" rows="4" placeholder="写下一段想说的话"></textarea></label>
         </article>
     </template>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/supabase-service.js"></script>
     <script src="js/site-data.js"></script>
     <script src="js/editor.js"></script>
 </body>

@@ -1,24 +1,46 @@
-const {
+﻿const {
     defaultContent,
     mergeContent,
-    loadContent,
+    loadLocalContent,
     persistContent,
     buildShareUrl,
     fileToDataUrl
 } = globalThis.LoveSiteData;
+const {
+    isConfigured,
+    loadCloudContent,
+    saveCloudContent,
+    uploadImage,
+    getConfig
+} = globalThis.LoveSiteSupabase;
 
 const state = {
-    content: null
+    content: null,
+    saving: false,
+    uploading: false
 };
 
 const dom = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
-    state.content = await loadContent();
+    state.content = await resolveInitialContent();
     cacheDom();
     bindEvents();
     fillEditor();
+    updateCloudHint();
 });
+
+async function resolveInitialContent() {
+    if (isConfigured()) {
+        const result = await loadCloudContent();
+        if (result.ok && result.data) {
+            persistContent(mergeContent(result.data));
+            return mergeContent(result.data);
+        }
+    }
+
+    return loadLocalContent();
+}
 
 function cacheDom() {
     const byId = (id) => document.getElementById(id);
@@ -33,6 +55,7 @@ function cacheDom() {
     dom.resetContent = byId("reset-content");
     dom.copyShareLink = byId("copy-share-link");
     dom.shareStatus = byId("share-status");
+    dom.cloudHint = byId("cloud-hint");
     dom.addTimelineItem = byId("add-timeline-item");
     dom.addGalleryItem = byId("add-gallery-item");
     dom.addNoteItem = byId("add-note-item");
@@ -74,17 +97,14 @@ function bindEvents() {
         fillEditor();
     });
 
-    dom.personAUploadInput.addEventListener("change", async (event) => {
-        const image = await fileToDataUrl(event.target.files[0]);
-        if (image) dom.personAImageInput.value = image;
+    dom.personAUploadInput.addEventListener("change", (event) => {
+        handleSingleImageUpload(event, dom.personAImageInput, "avatars");
     });
-    dom.personBUploadInput.addEventListener("change", async (event) => {
-        const image = await fileToDataUrl(event.target.files[0]);
-        if (image) dom.personBImageInput.value = image;
+    dom.personBUploadInput.addEventListener("change", (event) => {
+        handleSingleImageUpload(event, dom.personBImageInput, "avatars");
     });
-    dom.heroUploadInput.addEventListener("change", async (event) => {
-        const image = await fileToDataUrl(event.target.files[0]);
-        if (image) dom.heroImageInput.value = image;
+    dom.heroUploadInput.addEventListener("change", (event) => {
+        handleSingleImageUpload(event, dom.heroImageInput, "hero");
     });
 }
 
@@ -110,22 +130,24 @@ function fillEditor() {
         items: content.timelineItems,
         templateId: "timeline-editor-template",
         fields: ["date", "title", "description"],
-        uploadField: null
+        uploadFolder: ""
     });
     renderRepeatEditor({
         list: dom.galleryEditorList,
         items: content.galleryItems,
         templateId: "gallery-editor-template",
         fields: ["title", "description", "image"],
-        uploadField: "upload"
+        uploadFolder: "gallery"
     });
     renderRepeatEditor({
         list: dom.noteEditorList,
         items: content.noteItems,
         templateId: "note-editor-template",
         fields: ["title", "content"],
-        uploadField: null
+        uploadFolder: ""
     });
+
+    updateSaveButton();
 }
 
 function renderRepeatEditor(config) {
@@ -138,7 +160,7 @@ function renderRepeatEditor(config) {
 
         config.fields.forEach((field) => {
             const input = card.querySelector(`[data-field="${field}"]`);
-            input.value = item[field] || "";
+            if (input) input.value = item[field] || "";
         });
 
         card.querySelector('[data-action="remove"]').addEventListener("click", () => {
@@ -146,11 +168,11 @@ function renderRepeatEditor(config) {
             fillEditor();
         });
 
-        if (config.uploadField) {
-            card.querySelector(`[data-field="${config.uploadField}"]`).addEventListener("change", async (event) => {
-                const image = await fileToDataUrl(event.target.files[0]);
-                if (!image) return;
-                card.querySelector('[data-field="image"]').value = image;
+        const uploadInput = card.querySelector('[data-field="upload"]');
+        if (uploadInput && config.uploadFolder) {
+            uploadInput.addEventListener("change", async (event) => {
+                const imageInput = card.querySelector('[data-field="image"]');
+                await handleSingleImageUpload(event, imageInput, config.uploadFolder);
             });
         }
 
@@ -158,8 +180,80 @@ function renderRepeatEditor(config) {
     });
 }
 
-function saveEditorContent(options = {}) {
-    const nextContent = mergeContent(state.content);
+async function handleSingleImageUpload(event, targetInput, folder) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    state.uploading = true;
+    updateSaveButton();
+
+    try {
+        if (isConfigured()) {
+            setShareStatus("正在上传图片到 Supabase Storage...");
+            const result = await uploadImage(file, folder);
+            if (!result.ok) {
+                setShareStatus(`图片上传失败：${result.error}`);
+                return;
+            }
+            targetInput.value = result.data.publicUrl;
+            setShareStatus("图片已上传到云端，保存后全站可见。");
+        } else {
+            const image = await fileToDataUrl(file);
+            if (image) {
+                targetInput.value = image;
+                setShareStatus("当前未配置 Supabase，图片暂时只保存在本地浏览器或分享链接里。");
+            }
+        }
+    } finally {
+        event.target.value = "";
+        state.uploading = false;
+        updateSaveButton();
+    }
+}
+
+async function saveEditorContent(options = {}) {
+    if (state.saving) return;
+
+    state.saving = true;
+    updateSaveButton();
+
+    try {
+        const nextContent = buildContentFromForm();
+        state.content = nextContent;
+        persistContent(state.content);
+
+        if (isConfigured()) {
+            setShareStatus("正在保存到 Supabase 云端...");
+            const result = await saveCloudContent(state.content);
+            if (!result.ok) {
+                setShareStatus(`云端保存失败：${result.error}`);
+                if (!options.silent) {
+                    globalThis.alert(`云端保存失败：${result.error}`);
+                }
+                return;
+            }
+
+            setShareStatus("已保存到 Supabase 云端。对方刷新页面后就能看到最新内容。");
+            if (!options.silent) {
+                globalThis.alert("已保存到 Supabase 云端。对方打开网站就能看到最新内容。");
+            }
+        } else {
+            setShareStatus("已保存到当前浏览器。配置 Supabase 后，内容才能自动同步给对方。"
+            );
+            if (!options.silent) {
+                globalThis.alert("已保存到当前浏览器。配置 Supabase 后，内容才能自动同步给对方。");
+            }
+        }
+
+        fillEditor();
+    } finally {
+        state.saving = false;
+        updateSaveButton();
+    }
+}
+
+function buildContentFromForm() {
+    const nextContent = mergeContent(state.content || defaultContent);
 
     nextContent.siteTitle = dom.siteTitleInput.value.trim() || defaultContent.siteTitle;
     nextContent.hero.badge = dom.heroBadgeInput.value.trim() || defaultContent.hero.badge;
@@ -179,13 +273,7 @@ function saveEditorContent(options = {}) {
     nextContent.galleryItems = readRepeatValues(dom.galleryEditorList, ["title", "description", "image"]).filter((item) => item.title || item.description || item.image);
     nextContent.noteItems = readRepeatValues(dom.noteEditorList, ["title", "content"]).filter((item) => item.title || item.content);
 
-    state.content = nextContent;
-    persistContent(state.content);
-    fillEditor();
-    setShareStatus("内容已保存到当前浏览器。如果想同步给所有访问者，请导出 JSON 后覆盖仓库里的 data/site-content.json 并提交。");
-    if (!options.silent) {
-        globalThis.alert("已保存到本地浏览器。想同步到网站和代码仓库时，请导出 JSON，覆盖 data/site-content.json 后提交。");
-    }
+    return nextContent;
 }
 
 function readRepeatValues(container, fields) {
@@ -199,30 +287,34 @@ function readRepeatValues(container, fields) {
 }
 
 function exportJson() {
-    const blob = new Blob([JSON.stringify(state.content, null, 2)], { type: "application/json" });
+    const content = buildContentFromForm();
+    const blob = new Blob([JSON.stringify(content, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "site-content.json";
+    link.download = "love-site-content.json";
     link.click();
     URL.revokeObjectURL(url);
-    setShareStatus("已导出 site-content.json。把它覆盖到仓库里的 data/site-content.json 并提交后，所有人都会看到这份内容。");
+    setShareStatus("已导出 JSON 备份。");
 }
 
 async function copyShareLink() {
-    saveEditorContent({ silent: true });
+    state.content = buildContentFromForm();
+    persistContent(state.content);
 
     const shareUrl = buildShareUrl(state.content, "index.html");
     if (shareUrl.length > 180000) {
-        setShareStatus("分享链接可能过长，通常是因为图片太大。可以先压缩图片后再生成分享链接。");
+        setShareStatus("分享链接可能过长，通常是因为图片太大。建议先压缩图片。"
+        );
     }
 
     try {
         await globalThis.navigator.clipboard.writeText(shareUrl);
-        setShareStatus("分享链接已复制。把它发给对方后，对方就能看到同样的文字和图片。");
+        setShareStatus("分享链接已复制。把它发给对方，对方打开后会看到当前这份内容。"
+        );
     } catch (_error) {
         setShareStatus(`复制失败，请手动复制这个链接：${shareUrl}`);
-        globalThis.prompt("请复制这个分享链接并发给对方：", shareUrl);
+        globalThis.prompt("复制这个分享链接并发给对方：", shareUrl);
     }
 }
 
@@ -237,10 +329,11 @@ function importJson(event) {
             state.content = mergeContent(parsed);
             persistContent(state.content);
             fillEditor();
-            setShareStatus("导入完成，现在可以复制分享链接发给对方。");
-            globalThis.alert("导入完成。");
+            setShareStatus("导入成功。现在可以直接保存到云端。"
+            );
+            globalThis.alert("导入成功。");
         } catch (_error) {
-            globalThis.alert("JSON 解析失败，请检查文件格式是否正确。");
+            globalThis.alert("JSON 解析失败，请检查文件格式。");
         } finally {
             event.target.value = "";
         }
@@ -249,13 +342,47 @@ function importJson(event) {
 }
 
 function resetContent() {
-    const shouldReset = globalThis.confirm("要恢复默认内容吗？当前浏览器里的本地修改会被清空。");
+    const shouldReset = globalThis.confirm("确认恢复默认内容吗？当前浏览器中的本地修改会被清空。"
+    );
     if (!shouldReset) return;
 
     state.content = structuredClone(defaultContent);
     persistContent(state.content);
     fillEditor();
-    setShareStatus("已恢复为默认内容。");
+    setShareStatus("已恢复默认内容。");
+}
+
+function updateCloudHint() {
+    if (!dom.cloudHint) return;
+
+    if (isConfigured()) {
+        const config = getConfig();
+        dom.cloudHint.textContent = `Supabase 已连接。siteKey: ${config.siteKey}，bucket: ${config.bucket}`;
+        dom.cloudHint.dataset.state = "ready";
+        return;
+    }
+
+    dom.cloudHint.textContent = "Supabase 尚未配置。请先在 js/supabase-config.js 填入 url 和 anonKey。";
+    dom.cloudHint.dataset.state = "pending";
+}
+
+function updateSaveButton() {
+    if (!dom.saveEditor) return;
+
+    if (state.uploading) {
+        dom.saveEditor.textContent = "上传中...";
+        dom.saveEditor.disabled = true;
+        return;
+    }
+
+    if (state.saving) {
+        dom.saveEditor.textContent = "保存中...";
+        dom.saveEditor.disabled = true;
+        return;
+    }
+
+    dom.saveEditor.textContent = isConfigured() ? "保存到云端" : "保存到本地";
+    dom.saveEditor.disabled = false;
 }
 
 function setShareStatus(message) {

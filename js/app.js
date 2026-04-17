@@ -1,9 +1,11 @@
-const {
-    loadContent,
+﻿const {
+    loadLocalContent,
     loadSharedContentFromUrl,
+    mergeContent,
     escapeHtml,
     escapeAttribute
 } = globalThis.LoveSiteData;
+const { isConfigured, loadCloudContent } = globalThis.LoveSiteSupabase;
 
 const state = {
     content: null
@@ -15,12 +17,28 @@ let gsapContext = null;
 let anniversaryDateWarned = false;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    state.content = loadSharedContentFromUrl() || await loadContent();
+    state.content = await resolveInitialContent();
     cacheDom();
     renderPage();
     startCounter();
     initGsapAnimations();
 });
+
+async function resolveInitialContent() {
+    const sharedContent = loadSharedContentFromUrl();
+    if (sharedContent) {
+        return sharedContent;
+    }
+
+    if (isConfigured()) {
+        const result = await loadCloudContent();
+        if (result.ok && result.data) {
+            return mergeContent(result.data);
+        }
+    }
+
+    return loadLocalContent();
+}
 
 function cacheDom() {
     const byId = (id) => document.getElementById(id);
