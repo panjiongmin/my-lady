@@ -107,14 +107,17 @@ function bindEvents() {
     dom.resetContent.addEventListener("click", resetContent);
     dom.copyShareLink.addEventListener("click", copyShareLink);
     dom.addTimelineItem.addEventListener("click", () => {
+        syncStateWithForm();
         state.content.timelineItems.push({ date: "", title: "", description: "" });
         fillEditor();
     });
     dom.addGalleryItem.addEventListener("click", () => {
+        syncStateWithForm();
         state.content.galleryItems.push({ title: "", description: "", image: "" });
         fillEditor();
     });
     dom.addNoteItem.addEventListener("click", () => {
+        syncStateWithForm();
         state.content.noteItems.push({ title: "", content: "" });
         fillEditor();
     });
@@ -186,6 +189,7 @@ function renderRepeatEditor(config) {
         });
 
         card.querySelector('[data-action="remove"]').addEventListener("click", () => {
+            syncStateWithForm();
             config.items.splice(index, 1);
             fillEditor();
         });
@@ -297,6 +301,11 @@ function buildContentFromForm() {
     nextContent.noteItems = readRepeatValues(dom.noteEditorList, ["title", "content"]).filter((item) => item.title || item.content);
 
     return nextContent;
+}
+
+function syncStateWithForm() {
+    if (!dom.siteTitleInput) return;
+    state.content = buildContentFromForm();
 }
 
 function readRepeatValues(container, fields) {

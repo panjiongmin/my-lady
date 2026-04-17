@@ -28,3 +28,11 @@ Deno.test("editor.js references Supabase save flow", async () => {
   assertStringIncludes(script, "buildShareUrl");
   assertStringIncludes(script, "handleEditorLogin");
 });
+
+Deno.test("editor.js syncs form state before rerendering repeat lists", async () => {
+  const script = await Deno.readTextFile("js/editor.js");
+
+  assertStringIncludes(script, "function syncStateWithForm()");
+  assertStringIncludes(script, "syncStateWithForm();\n        state.content.timelineItems.push");
+  assertStringIncludes(script, "syncStateWithForm();\n            config.items.splice(index, 1)");
+});
