@@ -83,7 +83,7 @@
             });
 
         if (error) {
-            return { ok: false, error: error.message };
+            return { ok: false, error: formatStorageError(error, config.bucket) };
         }
 
         const { data } = supabase.storage.from(config.bucket).getPublicUrl(path);
@@ -100,6 +100,21 @@
 
     function randomId() {
         return Math.random().toString(36).slice(2, 10);
+    }
+
+    function formatStorageError(error, bucket) {
+        const message = String(error && error.message ? error.message : "未知上传错误");
+        const normalized = message.toLowerCase();
+
+        if (normalized.includes("bucket not found")) {
+            return `Bucket "${bucket}" 不存在，请先在 Supabase Storage 里创建同名 bucket。原始错误：${message}`;
+        }
+
+        if (normalized.includes("row-level security") || normalized.includes("permission")) {
+            return `Bucket "${bucket}" 的 Storage 权限未放开，请为 storage.objects 配置该 bucket 的上传策略。原始错误：${message}`;
+        }
+
+        return message;
     }
 
     globalThis.LoveSiteSupabase = {
