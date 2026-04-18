@@ -25,6 +25,7 @@ Deno.test("editor.js references Supabase save flow", async () => {
 
   assertStringIncludes(script, "saveCloudContent");
   assertStringIncludes(script, "uploadImage");
+  assertStringIncludes(script, "已自动改为内嵌图片");
   assertStringIncludes(script, "buildShareUrl");
   assertStringIncludes(script, "handleEditorLogin");
 });

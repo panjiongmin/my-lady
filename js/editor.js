@@ -218,6 +218,13 @@ async function handleSingleImageUpload(event, targetInput, folder) {
             setShareStatus("正在上传图片到 Supabase Storage...");
             const result = await uploadImage(file, folder);
             if (!result.ok) {
+                const embeddedImage = await fileToDataUrl(file);
+                if (embeddedImage) {
+                    targetInput.value = embeddedImage;
+                    setShareStatus(`图片上传到 Storage 失败，已自动改为内嵌图片。点击“保存到云端”后，对方也能看到。原因：${result.error}`);
+                    return;
+                }
+
                 setShareStatus(`图片上传失败：${result.error}`);
                 return;
             }
